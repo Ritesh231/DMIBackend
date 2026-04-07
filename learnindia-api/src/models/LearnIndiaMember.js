@@ -1,16 +1,44 @@
 const mongoose = require('mongoose');
 
+const isBlank = (value) =>
+  value === undefined ||
+  value === null ||
+  (typeof value === 'string' && value.trim() === '');
+
+const randomChunk = (length = 6) =>
+  Math.random().toString(36).slice(2, 2 + length).toUpperCase();
+
+const dateChunk = (date = new Date()) => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}${mm}${dd}`;
+};
+
+const generateOfficeCode = (prefix) => `${prefix}-${dateChunk()}-${randomChunk(6)}`;
+const generateReceiptNo = () => `RCP-${dateChunk()}-${randomChunk(5)}`;
+const generateMemberId = () => `LIL${dateChunk()}${randomChunk(6)}`;
+const normalizeDateOrNow = (value) => {
+  if (isBlank(value)) return new Date();
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+};
+const normalizeStringOr = (value, fallbackFn) => (isBlank(value) ? fallbackFn() : value);
+const normalizeEnumOr = (value, fallbackValue) => (isBlank(value) ? fallbackValue : value);
+
 const learnIndiaFormSchema = new mongoose.Schema({
   officeUse: {
-    chfn: { type: String, default: 'Auto-generated' },
-    sefn: { type: String, default: 'Auto-generated' },
-    olfn: { type: String, default: 'Auto-generated' },
-    dateTimeOfFilling: { type: Date, required: true },
-    receiptNo: { type: String, required: true },
+    chfn: { type: String, default: () => generateOfficeCode('CHFN'), set: (v) => normalizeStringOr(v, () => generateOfficeCode('CHFN')) },
+    sefn: { type: String, default: () => generateOfficeCode('SEFN'), set: (v) => normalizeStringOr(v, () => generateOfficeCode('SEFN')) },
+    olfn: { type: String, default: () => generateOfficeCode('OLFN'), set: (v) => normalizeStringOr(v, () => generateOfficeCode('OLFN')) },
+    dateTimeOfFilling: { type: Date, required: true, default: () => new Date(), set: normalizeDateOrNow },
+    receiptNo: { type: String, required: true, default: generateReceiptNo, set: (v) => normalizeStringOr(v, generateReceiptNo) },
     enrollmentType: {
       type: String,
       enum: ['Self', 'By Employee', 'Vendor', 'Referral', 'Other'],
-      required: true
+      required: true,
+      default: 'Self',
+      set: (v) => normalizeEnumOr(v, 'Self')
     },
     enrollmentCodeDetails: { type: String }
   },
@@ -124,8 +152,8 @@ const learnIndiaFormSchema = new mongoose.Schema({
   },
 
   memberIdentification: {
-    memberId: { type: String, default: 'Auto-generated' },
-    qrCodeReference: { type: String, default: 'Auto-generated' }
+    memberId: { type: String, default: generateMemberId, set: (v) => normalizeStringOr(v, generateMemberId) },
+    qrCodeReference: { type: String, default: () => `QR-${randomChunk(8)}`, set: (v) => normalizeStringOr(v, () => `QR-${randomChunk(8)}`) }
   },
 
   marketingSource: {
@@ -144,5 +172,44 @@ const learnIndiaFormSchema = new mongoose.Schema({
     agentSignature: { type: String }
   }
 }, { timestamps: true });
+
+learnIndiaFormSchema.pre('validate', function onPreValidate(next) {
+  if (!this.officeUse) this.officeUse = {};
+  if (!this.memberIdentification) this.memberIdentification = {};
+
+  if (isBlank(this.officeUse.chfn) || this.officeUse.chfn === 'Auto-generated') {
+    this.officeUse.chfn = generateOfficeCode('CHFN');
+  }
+  if (isBlank(this.officeUse.sefn) || this.officeUse.sefn === 'Auto-generated') {
+    this.officeUse.sefn = generateOfficeCode('SEFN');
+  }
+  if (isBlank(this.officeUse.olfn) || this.officeUse.olfn === 'Auto-generated') {
+    this.officeUse.olfn = generateOfficeCode('OLFN');
+  }
+  if (!this.officeUse.dateTimeOfFilling || Number.isNaN(new Date(this.officeUse.dateTimeOfFilling).getTime())) {
+    this.officeUse.dateTimeOfFilling = new Date();
+  }
+  if (isBlank(this.officeUse.receiptNo)) {
+    this.officeUse.receiptNo = generateReceiptNo();
+  }
+  if (isBlank(this.officeUse.enrollmentType)) {
+    this.officeUse.enrollmentType = 'Self';
+  }
+
+  if (
+    isBlank(this.memberIdentification.memberId) ||
+    this.memberIdentification.memberId === 'Auto-generated'
+  ) {
+    this.memberIdentification.memberId = generateMemberId();
+  }
+  if (
+    isBlank(this.memberIdentification.qrCodeReference) ||
+    this.memberIdentification.qrCodeReference === 'Auto-generated'
+  ) {
+    this.memberIdentification.qrCodeReference = `QR-${randomChunk(8)}`;
+  }
+
+  next();
+});
 
 module.exports = mongoose.model('LearnIndiaMember', learnIndiaFormSchema);
