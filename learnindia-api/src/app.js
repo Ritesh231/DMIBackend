@@ -4,7 +4,11 @@ const memberRoutes = require('./routes/memberRoutes');
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ['https://decodemeindia.com'],
+  })
+);
 app.use(express.json());
 
 app.get('/', (_req, res) => {

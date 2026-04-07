@@ -25,6 +25,7 @@ const normalizeDateOrNow = (value) => {
 };
 const normalizeStringOr = (value, fallbackFn) => (isBlank(value) ? fallbackFn() : value);
 const normalizeEnumOr = (value, fallbackValue) => (isBlank(value) ? fallbackValue : value);
+const normalizeOptionalEnum = (value) => (isBlank(value) ? undefined : value);
 
 const learnIndiaFormSchema = new mongoose.Schema({
   officeUse: {
@@ -128,7 +129,11 @@ const learnIndiaFormSchema = new mongoose.Schema({
   followUpTracking: {
     firstFollowUpDate: { type: Date },
     secondFollowUpDate: { type: Date },
-    status: { type: String, enum: ['Interested', 'Not Interested', 'Converted'] }
+    status: {
+      type: String,
+      enum: ['Interested', 'Not Interested', 'Converted'],
+      set: normalizeOptionalEnum
+    }
   },
 
   consentAndAwareness: {
