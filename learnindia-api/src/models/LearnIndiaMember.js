@@ -32,12 +32,11 @@ const learnIndiaFormSchema = new mongoose.Schema({
     chfn: { type: String, default: () => generateOfficeCode('CHFN'), set: (v) => normalizeStringOr(v, () => generateOfficeCode('CHFN')) },
     sefn: { type: String, default: () => generateOfficeCode('SEFN'), set: (v) => normalizeStringOr(v, () => generateOfficeCode('SEFN')) },
     olfn: { type: String, default: () => generateOfficeCode('OLFN'), set: (v) => normalizeStringOr(v, () => generateOfficeCode('OLFN')) },
-    dateTimeOfFilling: { type: Date, required: true, default: () => new Date(), set: normalizeDateOrNow },
-    receiptNo: { type: String, required: true, default: generateReceiptNo, set: (v) => normalizeStringOr(v, generateReceiptNo) },
+    dateTimeOfFilling: { type: Date, default: () => new Date(), set: normalizeDateOrNow },
+    receiptNo: { type: String, default: generateReceiptNo, set: (v) => normalizeStringOr(v, generateReceiptNo) },
     enrollmentType: {
       type: String,
       enum: ['Self', 'By Employee', 'Vendor', 'Referral', 'Other'],
-      required: true,
       default: 'Self',
       set: (v) => normalizeEnumOr(v, 'Self')
     },
@@ -45,37 +44,37 @@ const learnIndiaFormSchema = new mongoose.Schema({
   },
 
   primaryApplicant: {
-    fullName: { type: String, required: true },
-    parentOrSpouseName: { type: String, required: true },
-    dob: { type: Date, required: true },
-    age: { type: Number, required: true },
-    gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true },
-    maritalStatus: { type: String, enum: ['Single', 'Married'], required: true }
+    fullName: { type: String },
+    parentOrSpouseName: { type: String },
+    dob: { type: Date },
+    age: { type: Number },
+    gender: { type: String, enum: ['Male', 'Female', 'Other'] },
+    maritalStatus: { type: String, enum: ['Single', 'Married'] }
   },
 
   contactDetails: {
-    mobileNo: { type: String, required: true },
+    mobileNo: { type: String },
     alternateNo: { type: String },
     whatsappNo: { type: String },
-    emailId: { type: String, required: true }
+    emailId: { type: String }
   },
 
   addressDetails: {
-    fullAddress: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    pinCode: { type: String, required: true }
+    fullAddress: { type: String },
+    city: { type: String },
+    state: { type: String },
+    pinCode: { type: String }
   },
 
   educationProfession: {
-    highestQualification: { type: String, required: true },
-    occupation: { type: String, required: true },
+    highestQualification: { type: String },
+    occupation: { type: String },
     organizationName: { type: String },
     monthlyIncome: { type: String }
   },
 
   familyMembers: [{
-    memberName: { type: String, required: true },
+    memberName: { type: String },
     dob: { type: Date },
     age: { type: Number },
     gender: { type: String },
@@ -84,7 +83,7 @@ const learnIndiaFormSchema = new mongoose.Schema({
   }],
 
   studentDetails: [{
-    studentFullName: { type: String, required: true },
+    studentFullName: { type: String },
     currentClass: { type: String },
     lastYearMarks: { type: String },
     nextYearClass: { type: String },
@@ -96,17 +95,16 @@ const learnIndiaFormSchema = new mongoose.Schema({
   }],
 
   membershipDetails: {
-    planName: { type: String, required: true },
-    cardType: { type: String, enum: ['Individual', 'Family', 'Premium'], required: true },
-    amountPaid: { type: Number, required: true },
+    planName: { type: String },
+    cardType: { type: String, enum: ['Individual', 'Family', 'Premium'] },
+    amountPaid: { type: Number },
     paymentMode: {
       type: String,
       enum: ['Cash', 'UPI', 'Bank Transfer', 'Card'],
-      required: true
     },
     transactionId: { type: String },
-    joiningDate: { type: Date, required: true },
-    expiryDate: { type: Date, required: true }
+    joiningDate: { type: Date },
+    expiryDate: { type: Date }
   },
 
   purposeOfRegistration: {
@@ -121,8 +119,8 @@ const learnIndiaFormSchema = new mongoose.Schema({
   },
 
   kycDetails: {
-    idProofType: { type: String, enum: ['Aadhaar', 'PAN Card', 'Other'], required: true },
-    idNumber: { type: String, required: true },
+    idProofType: { type: String, enum: ['Aadhaar', 'PAN Card', 'Other'] },
+    idNumber: { type: String },
     documentAttached: { type: String, enum: ['Yes', 'No'] }
   },
 
@@ -140,12 +138,10 @@ const learnIndiaFormSchema = new mongoose.Schema({
     agreeToUpdates: {
       type: String,
       enum: ['Yes, I agree', 'No, I do not agree'],
-      required: true
     },
     understandBenefits: {
       type: String,
       enum: ['Yes, I understand', 'No, I need clarification'],
-      required: true
     }
   },
 
@@ -167,8 +163,8 @@ const learnIndiaFormSchema = new mongoose.Schema({
   },
 
   declaration: {
-    customerSignature: { type: String, required: true },
-    dateOfDeclaration: { type: Date, required: true }
+    customerSignature: { type: String },
+    dateOfDeclaration: { type: Date }
   },
 
   officeAgentDetails: {
