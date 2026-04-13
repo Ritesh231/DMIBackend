@@ -35,11 +35,13 @@ const memberSchema = new mongoose.Schema(
       },
       gender: {
         type: String,
-        enum: ["Male", "Female", "Other", ""],
+        enum: ["Male", "Female", "Other"],
+        default: "other"
       },
       maritalStatus: {
         type: String,
         enum: ["Single", "Married"],
+        default: "Single"
       },
     },
 
